@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 defaultSidecarVersion="v4.10.0"
 
+OS=$(uname)
+disableNetworkHostMode=false
+
+if [[ "$OS" == "Darwin" ]]; then
+    # in case macOS is being used, we need to disable the default network host mode
+    # which is unsupported by macOS hosts. For Linux (the default) we should still
+    # keep using host mode.
+    echo "Disabling network host mode, as it is incompatible with macOS hosts"
+    disableNetworkHostMode=true
+fi
+
 # Optional Parameters
 ###
 if [ -z "${CONTAINER_REGISTRY:=$containerRegistry}" ] && [ -n "${REGISTRY_KEY:=$registryKey}" ]; then
@@ -236,9 +247,14 @@ fi
 
 containerStopAndRemove "sidecar"
 
+networkMode="--network=host"
+if [[ "$disableNetworkHostMode" == "true" ]]; then
+    networkMode="-p 1521:1521 -p 5421:5432 -p 27017:27017" # to be set dynamically
+fi
+
 echo "Starting Sidecar"
 # shellcheck disable=SC2294
-if ! containerId=$(eval $dockercmd run -d --name sidecar --network=host --log-driver="${LOG_DRIVER:-json-file}" $log_opt_params --restart=unless-stopped \
+if ! containerId=$(eval $dockercmd run -d --name sidecar $networkMode --log-driver="${LOG_DRIVER:-json-file}" $log_opt_params --restart=unless-stopped \
     -e CYRAL_SIDECAR_ID="$SIDECAR_ID" \
     -e CYRAL_SIDECAR_CLIENT_ID="$CLIENT_ID" \
     -e CYRAL_SIDECAR_CLIENT_SECRET="$CLIENT_SECRET" \
