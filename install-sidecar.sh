@@ -4,11 +4,11 @@ defaultSidecarVersion="v4.10.0"
 # Optional Parameters
 ###
 if [ -z "${CONTAINER_REGISTRY:=$containerRegistry}" ] && [ -n "${REGISTRY_KEY:=$registryKey}" ]; then
-    CONTAINER_REGISTRY="gcr.io/cyralinc"
+    CONTAINER_REGISTRY="676443572060.dkr.ecr.us-east-1.amazonaws.com"
 elif [ -z "$CONTAINER_REGISTRY" ]; then
     CONTAINER_REGISTRY="public.ecr.aws/cyral"
 else
-    echo "CONTAINER_REGISTRY enviroment variable found, using '$CONTAINER_REGISTRY'"
+    echo "CONTAINER_REGISTRY environment variable found, using '$CONTAINER_REGISTRY'"
 fi
 
 # validate/install commands
